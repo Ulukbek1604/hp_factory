@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Кредиты{% endblock %}
+{% block page_title %}Кредиты{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Финансы</div>
+        <h2 class="page-title">Кредиты</h2>
+        <p class="page-desc">Журнал полученных кредитов и состояние погашения.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'credit_add' %}" class="btn btn-primary">Взять кредит</a>
+    </div>
+</div>
+
+{% if credits_data %}
+<div class="stats" style="margin-bottom: 20px;">
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Всего кредитов</div>
+        <div class="stat-value">{{ credits_data|length }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Общая сумма</div>
+        <div class="stat-value">{{ total_credits|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot brick"></span>Остаток долга</div>
+        <div class="stat-value">{{ total_remaining|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+</div>
+{% endif %}
+
+{% if due_credits %}
+<div class="alert alert-warn">
+    <div>
+        <div class="title">Подошёл срок платежа по кредиту</div>
+        <ul>
+            {% for c in due_credits %}
+            <li>Кредит #{{ c.id }} на {{ c.amount|floatformat:0 }} сом.
+                <a class="btn-link" href="{% url 'credit_pay' c.id %}">Оплатить сейчас</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<section class="panel">
+    <div class="panel-head">
+        <div class="panel-title">Журнал кредитов</div>
+        <div class="panel-sub">Суммы, ставки, сроки и статусы погашения</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th class="num">Сумма</th>
+                        <th class="num">Ставка</th>
+                        <th class="num">Срок</th>
+                        <th class="num">К выплате</th>
+                        <th class="num">Выплачено</th>
+                        <th class="num">Остаток</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in credits_data %}
+                    {% with credit=item.credit %}
+                    <tr>
+                        <td class="id">#{{ credit.id }}</td>
+                        <td class="num">{{ credit.amount|floatformat:0 }} сом</td>
+                        <td class="num">{{ credit.interest_rate|default:"—" }} %</td>
+                        <td class="num">{{ credit.term_months|default:"—" }} мес</td>
+                        <td class="num">{{ credit.total_to_pay|floatformat:0|default:"—" }} сом</td>
+                        <td class="num"><span class="badge badge-olive">{{ item.total_paid|floatformat:0 }} сом</span></td>
+                        <td class="num"><span class="badge badge-brick">{{ item.remaining|floatformat:0 }} сом</span></td>
+                        <td>
+                            {% if credit.status == 'active' %}
+                                <span class="badge badge-amber">Активный</span>
+                            {% elif credit.status == 'paid' %}
+                                <span class="badge badge-olive">Погашен</span>
+                            {% elif credit.status == 'overdue' %}
+                                <span class="badge badge-brick">Просрочен</span>
+                            {% else %}
+                                <span class="badge badge-gray">{{ credit.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ credit.credit_date|date:"d.m.Y" }}</td>
+                        <td>
+                            <a href="{% url 'credit_pay' credit.id %}" class="btn btn-success btn-sm">Погасить</a>
+                            <a href="{% url 'payment_schedule' credit.id %}" class="btn btn-ghost btn-sm">График</a>
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="10">Нет записей о кредитах.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

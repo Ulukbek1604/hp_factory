@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Рецептуры{% endblock %}
+{% block page_title %}Рецептуры{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Справочники</div>
+        <h2 class="page-title">Рецептуры продукции</h2>
+        <p class="page-desc">Состав каждого продукта — какое сырьё и в каком количестве требуется на единицу производства.</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">Добавить</button>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <div class="panel-title">Состав продукции</div>
+        <div class="panel-sub">Без рецептуры производство не будет списывать сырьё</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Продукция</th>
+                        <th>Сырьё</th>
+                        <th class="num">Кол-во на 1 ед.</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ing in ingredients %}
+                    <tr>
+                        <td class="id">#{{ ing.id }}</td>
+                        <td class="strong">{{ ing.product.name }}</td>
+                        <td>{{ ing.material.name }} <span class="muted">({{ ing.material.unit }})</span></td>
+                        <td class="num"><span class="badge badge-steel flat">{{ ing.quantity }}</span></td>
+                        <td>
+                            <form method="post" style="display:inline;" onsubmit="return confirm('Удалить ингредиент?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="pk" value="{{ ing.id }}">
+                                <button class="btn btn-danger btn-sm">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="5">Рецептура не задана. Добавьте ингредиенты — иначе производство не будет списывать сырьё.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-title">Добавить ингредиент</div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <div class="form-group">
+                <label class="form-label">Готовая продукция</label>
+                <select name="product_id" class="form-select" required>
+                    <option value="">— Выберите продукт —</option>
+                    {% for p in products %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Сырьё</label>
+                <select name="material_id" class="form-select" required>
+                    <option value="">— Выберите сырьё —</option>
+                    {% for m in materials %}<option value="{{ m.id }}">{{ m.name }} ({{ m.unit }})</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Количество на 1 единицу продукта</label>
+                <input type="number" step="0.001" name="quantity" class="form-control" required placeholder="Например: 2.5" min="0.001">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

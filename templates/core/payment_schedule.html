@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}График платежей{% endblock %}
+{% block page_title %}Кредиты{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Финансы</div>
+        <h2 class="page-title">График платежей</h2>
+        <p class="page-desc">Кредит #{{ credit.id }} — аннуитетный расчёт и история выплат.</p>
+    </div>
+    <div class="page-actions">
+        {% if credit.status == 'active' %}
+        <a href="{% url 'credit_pay' credit.id %}" class="btn btn-primary">Выплатить сейчас</a>
+        {% endif %}
+        <a href="{% url 'credits_list' %}" class="btn btn-ghost">← К списку</a>
+    </div>
+</div>
+
+<div class="stats" style="margin-bottom: 20px;">
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Сумма кредита</div>
+        <div class="stat-value">{{ credit.amount|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Общая сумма</div>
+        <div class="stat-value">{{ credit.total_to_pay|floatformat:0|default:"—" }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot olive"></span>Выплачено</div>
+        <div class="stat-value">{{ total_paid|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot brick"></span>Осталось</div>
+        <div class="stat-value">{{ remaining|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+</div>
+
+{% if schedule %}
+<section class="panel" style="margin-bottom: 20px;">
+    <div class="panel-head">
+        <div class="panel-title">Прогноз платежей (аннуитет)</div>
+        <div class="panel-sub">Расчётный график ежемесячных выплат</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Месяц</th>
+                        <th class="num">Платёж</th>
+                        <th class="num">Проценты</th>
+                        <th class="num">Основной долг</th>
+                        <th class="num">Остаток</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in schedule %}
+                    <tr>
+                        <td>{{ s.month }}</td>
+                        <td class="num"><strong>{{ s.payment|floatformat:2 }} сом</strong></td>
+                        <td class="num"><span class="badge badge-brick flat">{{ s.interest|floatformat:2 }}</span></td>
+                        <td class="num"><span class="badge badge-olive flat">{{ s.principal|floatformat:2 }}</span></td>
+                        <td class="num muted">{{ s.balance|floatformat:2 }} сом</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="panel">
+    <div class="panel-head">
+        <div class="panel-title">История выплат</div>
+        <div class="panel-sub">Фактически внесённые платежи по кредиту</div>
+    </div>
+    <div class="panel-body flush">
+        {% if payments %}
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Тип</th>
+                        <th class="num">Сумма</th>
+                        <th>Примечание</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td>{{ p.payment_date|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if p.payment_type == 'principal' %}
+                                <span class="badge badge-olive">Основной долг</span>
+                            {% elif p.payment_type == 'interest' %}
+                                <span class="badge badge-amber">Проценты</span>
+                            {% elif p.payment_type == 'fine' %}
+                                <span class="badge badge-brick">Штраф</span>
+                            {% else %}
+                                <span class="badge badge-gray">Совместная</span>
+                            {% endif %}
+                        </td>
+                        <td class="num"><strong>{{ p.amount|floatformat:2 }} сом</strong></td>
+                        <td class="muted">{{ p.note|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="panel-body">
+            <p class="muted">Пока нет выплат по этому кредиту.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

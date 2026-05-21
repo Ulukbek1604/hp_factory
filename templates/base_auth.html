@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP Factory - {% block title %}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'design/styles.css' %}">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--paper-2);
+            padding: 24px;
+        }
+
+        .auth-wrap {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-logo .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--ink);
+            color: var(--paper);
+            border-radius: 8px;
+            display: inline-grid;
+            place-items: center;
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 20px;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+        }
+
+        .auth-logo .logo-name {
+            font-family: var(--display);
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: -0.01em;
+            color: var(--ink);
+            display: block;
+        }
+
+        .auth-logo .logo-sub {
+            font-size: 12px;
+            color: var(--ink-3);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 12px;
+        }
+
+        .card-heading {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .card-heading .card-icon {
+            font-size: 36px;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .card-heading h2 {
+            font-family: var(--display);
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+
+        .card-heading p {
+            font-size: 13px;
+            color: var(--ink-3);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink-2);
+            letter-spacing: 0.02em;
+            margin-bottom: 5px;
+        }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--ink);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--ink);
+            box-shadow: 0 0 0 3px oklch(0.88 0.01 85);
+        }
+
+        .field-error {
+            font-size: 12px;
+            color: var(--brick-ink);
+            margin-top: 4px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.15s;
+            font-family: inherit;
+        }
+
+        .btn:hover { opacity: 0.85; }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--ink);
+            color: var(--paper);
+            margin-top: 8px;
+        }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 13px;
+            color: var(--ink-3);
+            margin-top: 16px;
+        }
+
+        .auth-footer a {
+            color: var(--ink);
+            font-weight: 500;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .security-note {
+            padding: 12px 16px;
+            background: var(--steel-soft);
+            border: 1px solid oklch(0.85 0.03 240);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--steel-ink);
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 14px;
+        }
+
+        .alert-error {
+            background: var(--brick-soft);
+            border: 1px solid oklch(0.85 0.08 35);
+            color: var(--brick-ink);
+        }
+
+        .alert-success {
+            background: var(--olive-soft);
+            border: 1px solid oklch(0.85 0.06 130);
+            color: var(--olive-ink);
+        }
+
+        .req-box {
+            padding: 12px;
+            background: var(--olive-soft);
+            border: 1px solid oklch(0.85 0.06 130);
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .req-box strong {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--olive-ink);
+        }
+
+        .req-box ul {
+            margin: 6px 0 0 16px;
+            font-size: 12px;
+            color: var(--ink-2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-wrap">
+        <div class="auth-logo">
+            <div class="logo-icon">HP</div>
+            <span class="logo-name">HP Factory</span>
+            <span class="logo-sub">Система управления</span>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

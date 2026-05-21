@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Новое производство{% endblock %}
+{% block page_title %}Производство{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Операции</div>
+        <h2 class="page-title">Новое производство</h2>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'production_list' %}" class="btn btn-ghost">← Назад</a>
+    </div>
+</div>
+
+<section class="panel" style="max-width: 640px;">
+    <div class="panel-head">
+        <div class="panel-title">Данные производства</div>
+        <div class="panel-sub">Укажите продукцию, количество и ответственного сотрудника</div>
+    </div>
+    <div class="panel-body">
+        <form method="post" class="col">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: var(--brick-ink); font-size: 12px; margin-top: 4px;">{{ field.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="toolbar mt-4">
+                <button type="submit" class="btn btn-primary">Произвести</button>
+                <a href="{% url 'production_list' %}" class="btn btn-ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="alert alert-info mt-4" style="max-width: 640px;">
+    <div class="title">Автоматические действия системы</div>
+    <ul>
+        <li>Проверка наличия сырья по рецептуре</li>
+        <li>Списание необходимого сырья со склада</li>
+        <li>Добавление готовой продукции на склад</li>
+    </ul>
+</div>
+
+{% endblock %}

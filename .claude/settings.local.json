@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(anthropic-skills:docx)",
+      "Skill(anthropic-skills:docx:*)",
+      "Bash(extract-text \"C:\\\\Users\\\\aisbe\\\\Downloads\\\\Telegram Desktop\\\\СУБД Турдумаматов Улукбек ПИ-4-23.docx\")",
+      "PowerShell(pandoc 'C:\\\\Users\\\\aisbe\\\\Downloads\\\\Telegram Desktop\\\\���� ���㬠��⮢ ��㪡�� ��-4-23.docx' -o 'C:\\\\��⨤�窨\\\\3-����\\\\2-ᥬ����\\\\��������\\\\hp_factory\\\\coursework_work\\\\example.md')"
+    ]
+  }
+}

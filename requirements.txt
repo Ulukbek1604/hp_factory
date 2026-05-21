@@ -1,0 +1,5 @@
+django>=4.2
+mssql-django
+pyodbc
+bcrypt>=4.0
+argon2-cffi>=21.3

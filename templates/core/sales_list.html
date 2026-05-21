@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Продажи{% endblock %}
+{% block page_title %}Продажи{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Операции</div>
+        <h2 class="page-title">Продажи продукции</h2>
+        <p class="page-desc">Журнал продаж готовой продукции предприятия.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'sales_add' %}" class="btn btn-primary">Новая продажа</a>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <div class="panel-title">Журнал продаж</div>
+        <div class="panel-sub">Все операции реализации готовой продукции</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Продукция</th>
+                        <th class="num">Количество</th>
+                        <th class="num">Выручка</th>
+                        <th>Дата</th>
+                        <th>Сотрудник</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sales %}
+                    <tr>
+                        <td class="id">#{{ s.id }}</td>
+                        <td class="strong">{{ s.product }}</td>
+                        <td class="num">{{ s.quantity }}</td>
+                        <td class="num"><span class="badge badge-olive">{{ s.sum_amount }} сом</span></td>
+                        <td>{{ s.sale_date|date:"d.m.Y H:i" }}</td>
+                        <td class="muted">{{ s.employee|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="6">Продаж пока нет. Добавьте первую продажу.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

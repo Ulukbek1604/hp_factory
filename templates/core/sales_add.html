@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Новая продажа{% endblock %}
+{% block page_title %}Продажи{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Операции</div>
+        <h2 class="page-title">Регистрация продажи</h2>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'sales_list' %}" class="btn btn-ghost">← Назад</a>
+    </div>
+</div>
+
+<section class="panel" style="max-width: 640px;">
+    <div class="panel-head">
+        <div class="panel-title">Данные продажи</div>
+        <div class="panel-sub">Сумма рассчитывается автоматически по цене продукта</div>
+    </div>
+    <div class="panel-body">
+        <form method="post" class="col">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: var(--brick-ink); font-size: 12px; margin-top: 4px;">{{ field.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="toolbar mt-4">
+                <button type="submit" class="btn btn-primary">Оформить продажу</button>
+                <a href="{% url 'sales_list' %}" class="btn btn-ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="alert alert-info mt-4" style="max-width: 640px;">
+    <div class="title">Автоматические действия системы</div>
+    <ul>
+        <li>Проверка наличия товара на складе</li>
+        <li>Добавление выручки в общий бюджет</li>
+        <li>Списание продукции со склада</li>
+    </ul>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const prices = {{ prices_json|safe }};
+    const productSelect = document.getElementById('id_product');
+    const quantityInput = document.getElementById('id_quantity');
+    const sumAmountInput = document.getElementById('id_sum_amount');
+
+    function calculateSum() {
+        const productId = productSelect.value;
+        const qty = parseFloat(quantityInput.value) || 0;
+        if (productId && prices[productId]) {
+            sumAmountInput.value = (prices[productId] * qty).toFixed(2);
+        } else {
+            sumAmountInput.value = '';
+        }
+    }
+
+    if (productSelect && quantityInput && sumAmountInput) {
+        productSelect.addEventListener('change', calculateSum);
+        quantityInput.addEventListener('input', calculateSum);
+        if (productSelect.value) calculateSum();
+    }
+</script>
+{% endblock %}

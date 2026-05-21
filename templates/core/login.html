@@ -1,0 +1,36 @@
+{% extends 'base_auth.html' %}
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-heading">
+        <div class="card-icon">🔐</div>
+        <h2>Добро пожаловать</h2>
+        <p>Войдите в систему управления HP Factory</p>
+    </div>
+
+    <form method="POST" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="field-error">{% for error in field.errors %}{{ error }}{% endfor %}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Войти</button>
+    </form>
+</div>
+
+<div class="auth-footer">
+    Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+</div>
+
+<div class="security-note" style="margin-top: 12px;">
+    <strong>Защита авторизации:</strong> CSRF-токен, хеширование паролей, безопасные Django-сессии.
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Должности{% endblock %}
+{% block page_title %}Справочники{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Справочники</div>
+        <h2 class="page-title">Должности</h2>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">Добавить</button>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Название должности</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in positions %}
+                    <tr>
+                        <td class="id">#{{ p.id }}</td>
+                        <td class="strong">{{ p.title }}</td>
+                        <td>
+                            <button class="btn btn-ghost btn-sm" onclick="openEdit({{ p.id }}, '{{ p.title|escapejs }}')">Изменить</button>
+                            <form method="post" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="pk" value="{{ p.id }}">
+                                <button class="btn btn-danger btn-sm">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="3">Нет данных.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div id="addModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-title">Добавить должность</div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <div class="form-group"><label class="form-label">Название</label><input name="title" class="form-control" required></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-title">Редактировать должность</div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="pk" id="editPk">
+            <div class="form-group"><label class="form-label">Название</label><input name="title" id="editTitle" class="form-control" required></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('editModal').classList.remove('open')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    function openEdit(pk, title) {
+        document.getElementById('editPk').value = pk;
+        document.getElementById('editTitle').value = title;
+        document.getElementById('editModal').classList.add('open');
+    }
+</script>
+{% endblock %}

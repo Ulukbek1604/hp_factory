@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Личный кабинет{% endblock %}
+{% block page_title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Аккаунт</div>
+        <h2 class="page-title">Личный кабинет</h2>
+    </div>
+</div>
+
+<div style="max-width: 640px;">
+    <section class="panel" style="margin-bottom: 20px;">
+        <div class="panel-head">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 48px; height: 48px; background: var(--ink); color: var(--paper);
+                            border-radius: 50%; display: grid; place-items: center;
+                            font-family: var(--display); font-size: 20px; font-weight: 600; flex-shrink: 0;">
+                    {{ request.user.first_name|first|upper|default:request.user.username|first|upper }}
+                </div>
+                <div>
+                    <div class="panel-title">{{ request.user.get_full_name|default:request.user.username }}</div>
+                    <div class="panel-sub">{{ request.user.email|default:"Email не указан" }}</div>
+                </div>
+            </div>
+            <div>
+                {% if request.user.is_superuser %}
+                <span class="badge badge-olive">Администратор</span>
+                {% elif request.user.is_staff %}
+                <span class="badge badge-steel">Персонал</span>
+                {% else %}
+                <span class="badge badge-gray">Пользователь</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="panel-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                <div style="padding: 14px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 6px;">
+                    <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px;">Логин</div>
+                    <div style="font-size: 15px; font-weight: 600; color: var(--ink);">{{ request.user.username }}</div>
+                </div>
+                <div style="padding: 14px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 6px;">
+                    <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px;">Дата регистрации</div>
+                    <div style="font-size: 15px; font-weight: 600; color: var(--ink);">{{ request.user.date_joined|date:"d.m.Y" }}</div>
+                </div>
+                <div style="padding: 14px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 6px;">
+                    <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px;">Последний вход</div>
+                    <div style="font-size: 15px; font-weight: 600; color: var(--ink);">{{ request.user.last_login|date:"d.m.Y H:i"|default:"—" }}</div>
+                </div>
+                <div style="padding: 14px; background: var(--olive-soft); border: 1px solid oklch(0.85 0.06 130); border-radius: 6px;">
+                    <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px;">Пароль</div>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--olive-ink);">Зашифрован</div>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--rule); padding-top: 20px;">
+                <div style="font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 14px; letter-spacing: 0.02em; text-transform: uppercase;">Редактировать данные</div>
+                <form method="POST" novalidate class="col">
+                    {% csrf_token %}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ form.email.label }}</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="toolbar mt-4">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a href="{% url 'password_demo' %}" class="btn btn-ghost">Демо шифрования</a>
+                        <form method="POST" action="{% url 'logout' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Выйти</button>
+                        </form>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div class="alert alert-info">
+        <div>
+            <div class="title">Защита персональных данных</div>
+            <ul>
+                <li>Доступ только авторизованному пользователю (<code>@login_required</code>)</li>
+                <li>Пароль хранится в зашифрованном виде</li>
+                <li>CSRF-токен защищает от межсайтовых подделок</li>
+                <li>Email и данные видны только владельцу аккаунта</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

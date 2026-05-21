@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Производство{% endblock %}
+{% block page_title %}Производство{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Операции</div>
+        <h2 class="page-title">Производство продукции</h2>
+        <p class="page-desc">История производственных операций на предприятии.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'production_add' %}" class="btn btn-primary">Новое производство</a>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <div class="panel-title">Журнал производства</div>
+        <div class="panel-sub">Все записи о производстве готовой продукции</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Продукция</th>
+                        <th class="num">Количество</th>
+                        <th>Дата</th>
+                        <th>Сотрудник</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in productions %}
+                    <tr>
+                        <td class="id">#{{ p.id }}</td>
+                        <td class="strong">{{ p.product }}</td>
+                        <td class="num">{{ p.quantity }}</td>
+                        <td>{{ p.production_date|date:"d.m.Y H:i" }}</td>
+                        <td class="muted">{{ p.employee|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="5">Производственных записей пока нет.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

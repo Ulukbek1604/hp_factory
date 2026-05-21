@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Зарплаты{% endblock %}
+{% block page_title %}Зарплаты{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Финансы</div>
+        <h2 class="page-title">Выплаты зарплат</h2>
+        <p class="page-desc">История выплат заработной платы сотрудникам.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'salary_add' %}" class="btn btn-primary">Выдать зарплату</a>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <div class="panel-title">Журнал выплат</div>
+        <div class="panel-sub">Все операции начисления заработной платы</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Сотрудник</th>
+                        <th class="num">Сумма выплаты</th>
+                        <th>Дата выплаты</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in salaries %}
+                    <tr>
+                        <td class="id">#{{ s.id }}</td>
+                        <td class="strong">{{ s.employee }}</td>
+                        <td class="num"><span class="badge badge-brick">{{ s.amount }} сом</span></td>
+                        <td>{{ s.payment_date|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="4">Записей о выплатах пока нет.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

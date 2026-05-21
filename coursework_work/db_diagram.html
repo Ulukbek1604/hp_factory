@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Диаграмма БД HP_Factory</title>
+<style>
+  html, body { margin:0; padding:0; background:#ffffff; font-family: 'Segoe UI', Arial, sans-serif; }
+  .canvas {
+    position: relative;
+    width: 1500px;
+    height: 1050px;
+    background:
+      linear-gradient(#f2f4f7 1px, transparent 1px) 0 0 / 30px 30px,
+      linear-gradient(90deg, #f2f4f7 1px, transparent 1px) 0 0 / 30px 30px,
+      #ffffff;
+  }
+  .table {
+    position: absolute;
+    width: 230px;
+    border: 1.5px solid #1e3a8a;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-size: 13px;
+    overflow: hidden;
+  }
+  .table .header {
+    background: linear-gradient(180deg, #1e3a8a, #2563eb);
+    color: #fff;
+    padding: 6px 10px;
+    font-weight: 600;
+    letter-spacing: .3px;
+  }
+  .table .pk { background: #fff7e6; }
+  .table .fk { background: #eef6ff; }
+  .table ul {
+    margin: 0; padding: 0; list-style: none;
+  }
+  .table li {
+    padding: 4px 10px;
+    border-top: 1px solid #e5e7eb;
+    display: flex; justify-content: space-between; gap: 8px;
+    font-family: Consolas, Menlo, monospace;
+    font-size: 12px;
+    color: #111827;
+  }
+  .table li .type { color: #6b7280; font-size: 11px; }
+  .key { display: inline-block; width:14px; }
+  svg.links {
+    position: absolute; left:0; top:0;
+    width:100%; height:100%;
+    pointer-events:none;
+  }
+  .title {
+    position:absolute; top:18px; left:50%; transform:translateX(-50%);
+    font-size: 22px; font-weight: 700; color: #0f172a;
+  }
+  .legend {
+    position:absolute; bottom: 14px; right: 16px;
+    background:#fff; border:1px solid #cbd5e1; padding:8px 12px;
+    border-radius:6px; font-size:12px; color:#334155;
+  }
+  .legend span { display:inline-block; width:14px; height:14px;
+    vertical-align:middle; margin-right:6px; border-radius:3px; border:1px solid #cbd5e1; }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <div class="title">База данных HP_Factory — 14 таблиц</div>
+
+  <!-- ===== Справочники (top row) ===== -->
+  <div class="table" style="left:40px; top:90px;" id="t-units">
+    <div class="header">Units</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li><span>name</span><span class="type">NVARCHAR(50)</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:320px; top:90px;" id="t-positions">
+    <div class="header">Positions</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li><span>title</span><span class="type">NVARCHAR(100)</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:600px; top:90px;" id="t-budget">
+    <div class="header">Budget</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li><span>TotalAmount</span><span class="type">DECIMAL(18,2)</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:1240px; top:90px;" id="t-employees">
+    <div class="header">Employees</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li><span>FullName</span><span class="type">NVARCHAR(150)</span></li>
+      <li class="fk"><span>🔗 PositionID</span><span class="type">FK</span></li>
+      <li><span>Salary</span><span class="type">DECIMAL(18,2)</span></li>
+      <li><span>Address</span><span class="type">NVARCHAR(255)</span></li>
+      <li><span>Phone</span><span class="type">NVARCHAR(20)</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== Склад / Рецептура (middle) ===== -->
+  <div class="table" style="left:40px; top:320px;" id="t-rawmat">
+    <div class="header">RawMaterials</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li><span>Name</span><span class="type">NVARCHAR(100)</span></li>
+      <li class="fk"><span>🔗 UnitID</span><span class="type">FK</span></li>
+      <li><span>Quantity</span><span class="type">FLOAT</span></li>
+      <li><span>SumAmount</span><span class="type">FLOAT</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:610px; top:320px;" id="t-ingredients">
+    <div class="header">Ingredients</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li class="fk"><span>🔗 ProductID</span><span class="type">FK</span></li>
+      <li class="fk"><span>🔗 MaterialID</span><span class="type">FK</span></li>
+      <li><span>Quantity</span><span class="type">FLOAT</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:1180px; top:320px;" id="t-finprod">
+    <div class="header">FinishedProducts</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li><span>Name</span><span class="type">NVARCHAR(100)</span></li>
+      <li class="fk"><span>🔗 UnitID</span><span class="type">FK</span></li>
+      <li><span>Quantity</span><span class="type">FLOAT</span></li>
+      <li><span>SumAmount</span><span class="type">FLOAT</span></li>
+      <li><span>SellingPrice</span><span class="type">DECIMAL(18,2)</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== Операции и финансы (bottom row) ===== -->
+  <div class="table" style="left:40px; top:560px;" id="t-purchases">
+    <div class="header">RawMaterialPurchases</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li class="fk"><span>🔗 MaterialID</span><span class="type">FK</span></li>
+      <li><span>Quantity</span><span class="type">FLOAT</span></li>
+      <li><span>SumAmount</span><span class="type">DECIMAL(18,2)</span></li>
+      <li><span>PurchaseDate</span><span class="type">DATETIME</span></li>
+      <li class="fk"><span>🔗 EmployeeID</span><span class="type">FK</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:340px; top:560px;" id="t-production">
+    <div class="header">ProductProduction</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li class="fk"><span>🔗 ProductID</span><span class="type">FK</span></li>
+      <li><span>Quantity</span><span class="type">FLOAT</span></li>
+      <li><span>ProductionDate</span><span class="type">DATETIME</span></li>
+      <li class="fk"><span>🔗 EmployeeID</span><span class="type">FK</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:640px; top:560px;" id="t-sales">
+    <div class="header">ProductSales</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li class="fk"><span>🔗 ProductID</span><span class="type">FK</span></li>
+      <li><span>Quantity</span><span class="type">FLOAT</span></li>
+      <li><span>SumAmount</span><span class="type">DECIMAL(18,2)</span></li>
+      <li><span>SaleDate</span><span class="type">DATETIME</span></li>
+      <li class="fk"><span>🔗 EmployeeID</span><span class="type">FK</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:940px; top:560px;" id="t-salary">
+    <div class="header">SalaryPayments</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li class="fk"><span>🔗 EmployeeID</span><span class="type">FK</span></li>
+      <li><span>Amount</span><span class="type">DECIMAL(18,2)</span></li>
+      <li><span>PaymentDate</span><span class="type">DATETIME</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:1240px; top:560px;" id="t-credits">
+    <div class="header">Credits</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li><span>Amount</span><span class="type">DECIMAL(18,2)</span></li>
+      <li><span>InterestRate</span><span class="type">DECIMAL(5,2)</span></li>
+      <li><span>TermMonths</span><span class="type">INT</span></li>
+      <li><span>Status</span><span class="type">NVARCHAR(20)</span></li>
+      <li><span>TotalToPay</span><span class="type">DECIMAL(18,2)</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:340px; top:850px;" id="t-credpay">
+    <div class="header">CreditPayments</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li class="fk"><span>🔗 CreditID</span><span class="type">FK</span></li>
+      <li><span>Amount</span><span class="type">DECIMAL(18,2)</span></li>
+      <li><span>PaymentType</span><span class="type">NVARCHAR(20)</span></li>
+      <li><span>PaymentDate</span><span class="type">DATETIME</span></li>
+    </ul>
+  </div>
+
+  <div class="table" style="left:940px; top:850px;" id="t-requests">
+    <div class="header">ProductionRequests</div>
+    <ul>
+      <li class="pk"><span>🔑 id</span><span class="type">INT</span></li>
+      <li class="fk"><span>🔗 ApplicantID</span><span class="type">FK</span></li>
+      <li class="fk"><span>🔗 ProductID</span><span class="type">FK</span></li>
+      <li><span>Quantity</span><span class="type">FLOAT</span></li>
+      <li><span>Status</span><span class="type">NVARCHAR(50)</span></li>
+      <li><span>CreationDate</span><span class="type">DATETIME</span></li>
+    </ul>
+  </div>
+
+  <!-- ===== Linking lines ===== -->
+  <svg class="links" viewBox="0 0 1500 1050">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#2563eb" />
+      </marker>
+    </defs>
+    <!-- Employees -> Positions -->
+    <path d="M 1240,170 C 1080,170 720,170 550,150" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- RawMaterials -> Units -->
+    <path d="M 155,320 C 155,260 155,200 155,170" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- FinishedProducts -> Units -->
+    <path d="M 1295,320 C 1295,260 800,200 270,165" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- Ingredients -> FinishedProducts -->
+    <path d="M 840,400 C 1000,400 1140,400 1180,400" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- Ingredients -> RawMaterials -->
+    <path d="M 610,400 C 500,400 350,400 270,400" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- RawMaterialPurchases -> RawMaterials -->
+    <path d="M 155,560 C 155,520 155,490 155,470" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- RawMaterialPurchases -> Employees -->
+    <path d="M 270,640 C 600,640 1100,400 1300,260" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- ProductProduction -> FinishedProducts -->
+    <path d="M 470,560 C 470,500 1180,470 1280,440" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- ProductProduction -> Employees -->
+    <path d="M 570,640 C 800,640 1100,400 1300,260" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- ProductSales -> FinishedProducts -->
+    <path d="M 770,560 C 800,500 1180,460 1280,440" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- ProductSales -> Employees -->
+    <path d="M 870,640 C 1000,640 1200,500 1320,260" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- SalaryPayments -> Employees -->
+    <path d="M 1060,560 C 1060,460 1280,330 1320,260" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- CreditPayments -> Credits -->
+    <path d="M 470,850 C 700,800 1200,750 1355,750" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- ProductionRequests -> FinishedProducts -->
+    <path d="M 1170,870 C 1300,700 1330,500 1300,450" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <!-- ProductionRequests -> Employees -->
+    <path d="M 1170,870 C 1380,700 1420,400 1370,260" stroke="#2563eb" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>
+  </svg>
+
+  <div class="legend">
+    <div><span style="background:#fff7e6"></span> 🔑 первичный ключ (PK)</div>
+    <div style="margin-top:4px"><span style="background:#eef6ff"></span> 🔗 внешний ключ (FK)</div>
+    <div style="margin-top:4px; color:#2563eb">→ направление связи (Child → Parent)</div>
+  </div>
+</div>
+
+</body>
+</html>

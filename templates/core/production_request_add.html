@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Новая заявка на производство{% endblock %}
+{% block page_title %}Новая заявка{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Производство</div>
+        <h2 class="page-title">Новая заявка</h2>
+        <p class="page-desc">
+            После отправки система проверит сырье, при необходимости создаст закупку,
+            затем проведет производство и продажу готовой продукции.
+        </p>
+    </div>
+</div>
+
+<section class="panel" style="max-width: 760px;">
+    <div class="panel-head">
+        <div>
+            <div class="panel-title">Параметры заявки</div>
+            <div class="panel-sub">Укажите продукцию, количество и заявителя.</div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <form method="POST" class="col">
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div class="field">
+                <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <div class="help">{{ field.help_text }}</div>
+                {% endif %}
+                {% if field.errors %}
+                <div class="help" style="color: var(--brick-ink);">{{ field.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="toolbar mt-4">
+                <button type="submit" class="btn btn-primary">Отправить и запустить обработку</button>
+                <a href="{% url 'production_requests_list' %}" class="btn btn-ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

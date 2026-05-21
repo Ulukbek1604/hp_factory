@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Заявки на производство{% endblock %}
+{% block page_title %}Заявки на производство{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Заявочная система</div>
+        <h2 class="page-title">Заявки на производство</h2>
+        <p class="page-desc">
+            Автоматический маршрут: проверка сырья, закупка при нехватке, производство и продажа.
+            {% if can_view_all_requests %}
+            Вы видите все заявки.
+            {% else %}
+            Вы видите только свои заявки.
+            {% endif %}
+        </p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'production_request_add' %}" class="btn btn-primary">Создать заявку</a>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <div class="panel-title">Журнал заявок</div>
+            <div class="panel-sub">Список созданных заявок и текущих статусов обработки</div>
+        </div>
+        <div class="filter-chip">
+            <span>Режим:</span>
+            <strong>{% if can_view_all_requests %}все заявки{% else %}только мои{% endif %}</strong>
+        </div>
+    </div>
+
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Создана</th>
+                        <th>Обновлена</th>
+                        <th>Заявитель</th>
+                        <th>Продукция</th>
+                        <th class="num">Кол-во</th>
+                        <th>Статус</th>
+                        <th>Причина отказа/ошибки</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests_list %}
+                    <tr>
+                        <td class="id">#{{ req.id }}</td>
+                        <td>{{ req.creation_date|date:"d.m.Y H:i" }}</td>
+                        <td>{{ req.updated_date|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if req.applicant_full_name %}
+                            <span class="strong">{{ req.applicant_full_name }}</span>
+                            {% elif req.applicant %}
+                            <span class="strong">{{ req.applicant.full_name }}</span>
+                            {% else %}
+                            <span class="muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ req.product.name }}</td>
+                        <td class="num">{{ req.quantity|floatformat:-2 }}</td>
+                        <td>
+                            {% if req.status == 'Создана' %}
+                            <span class="badge badge-gray">{{ req.status }}</span>
+                            {% elif req.status == 'Выполнена' %}
+                            <span class="badge badge-olive">{{ req.status }}</span>
+                            {% elif req.status == 'Ошибка' %}
+                            <span class="badge badge-brick">{{ req.status }}</span>
+                            {% elif req.status == 'На процессе закупки сырья' %}
+                            <span class="badge badge-amber">{{ req.status }}</span>
+                            {% else %}
+                            <span class="badge badge-steel">{{ req.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="max-width: 360px;">
+                            {% if req.rejection_reason %}
+                            <span class="badge badge-brick flat" title="{{ req.rejection_reason }}">{{ req.rejection_reason }}</span>
+                            {% else %}
+                            <span class="muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="8">Заявок на производство пока нет.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

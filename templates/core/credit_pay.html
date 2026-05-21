@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Погашение кредита{% endblock %}
+{% block page_title %}Кредиты{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Финансы</div>
+        <h2 class="page-title">Погашение кредита</h2>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'credits_list' %}" class="btn btn-ghost">← К списку</a>
+    </div>
+</div>
+
+<div class="stats" style="max-width: 720px; margin-bottom: 20px;">
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Кредит #{{ credit.id }}</div>
+        <div class="stat-value">{{ credit.amount|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot brick"></span>Остаток</div>
+        <div class="stat-value">{{ remaining|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot amber"></span>Статус</div>
+        <div class="stat-value" style="font-size: 20px; padding-top: 6px;">
+            {% if credit.status == 'active' %}
+                <span class="badge badge-amber">Активный</span>
+            {% elif credit.status == 'paid' %}
+                <span class="badge badge-olive">Погашен</span>
+            {% elif credit.status == 'overdue' %}
+                <span class="badge badge-brick">Просрочен</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="panel" style="max-width: 720px;">
+    <div class="panel-head">
+        <div class="panel-title">Выплата по кредиту</div>
+        {% if remaining > 0 %}
+        <div class="panel-sub">Аннуитетный платёж: {{ monthly_payment|floatformat:0 }} сом/мес</div>
+        {% endif %}
+    </div>
+    <div class="panel-body">
+        <form method="post" class="col">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: var(--brick-ink); font-size: 12px; margin-top: 4px;">{{ field.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if remaining > 0 %}
+            <div class="alert alert-warn" style="margin-top: 4px;">
+                <div>Остаток к погашению: <strong>{{ remaining|floatformat:2 }} сом</strong></div>
+            </div>
+            {% endif %}
+
+            <div class="toolbar mt-4">
+                <button type="submit" class="btn btn-success">Погасить</button>
+                <button type="button" class="btn btn-primary" onclick="payInFull()">Погасить полностью</button>
+                <a href="{% url 'credits_list' %}" class="btn btn-ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="alert alert-info mt-4" style="max-width: 720px;">
+    <ul>
+        <li>Выплата будет списана из бюджета предприятия</li>
+        <li>После полного погашения кредит получит статус «Погашен»</li>
+        <li>График платежей доступен в журнале кредитов → кнопка «График»</li>
+    </ul>
+</div>
+
+<script>
+    function payInFull() {
+        var remaining = parseFloat("{{ remaining|stringformat:'f' }}".replace(',', '.'));
+        if (!isNaN(remaining)) {
+            var amountInput = document.getElementById('id_amount');
+            if (amountInput) amountInput.value = remaining.toFixed(2);
+            var noteInput = document.getElementById('id_note');
+            if (noteInput) noteInput.value = "Полное погашение кредита";
+        }
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+body { background:#0c0c0c; color:#cccccc; font-family: Consolas, 'Cascadia Mono', monospace; font-size: 15px; padding: 24px; line-height: 1.45; }
+.cmd  { color:#f9f1a5; }
+.ok   { color:#16c60c; }
+.hi   { color:#ffffff; }
+.dim  { color:#9b9b9b; }
+.dot  { color:#61d6d6; }
+.title { background:#3a3a3a; color:#fff; padding: 4px 10px; margin: -24px -24px 18px -24px; font-size: 14px; }
+</style></head><body>
+<div class="title">PS C:\метидички\3-курс\2-семестр\Абалиева\hp_factory&gt;</div>
+
+<span class="cmd">(.venv) PS C:\hp_factory&gt; python manage.py test core --verbosity=2</span><br/>
+<br/>
+<span class="dim">Creating test database for alias 'default'...</span><br/>
+<span class="dim">System check identified no issues (0 silenced).</span><br/>
+<br/>
+test_credit_total_to_pay_simple_interest (core.tests.CreditModelTests) ... <span class="ok">ok</span><br/>
+test_credit_status_default_active (core.tests.CreditModelTests) ... <span class="ok">ok</span><br/>
+test_credit_get_remaining_amount (core.tests.CreditModelTests) ... <span class="ok">ok</span><br/>
+test_credit_update_status_paid (core.tests.CreditModelTests) ... <span class="ok">ok</span><br/>
+test_admin_sees_reports (core.tests.RoleRoutingTests) ... <span class="ok">ok</span><br/>
+test_worker_redirected_from_reports (core.tests.RoleRoutingTests) ... <span class="ok">ok</span><br/>
+test_admin_sees_credits (core.tests.RoleRoutingTests) ... <span class="ok">ok</span><br/>
+test_budget_check_sp_allows (core.tests.BudgetSPTests) ... <span class="ok">ok</span><br/>
+test_budget_check_sp_denies (core.tests.BudgetSPTests) ... <span class="ok">ok</span><br/>
+test_production_request_status_flow (core.tests.ProductionRequestTests) ... <span class="ok">ok</span><br/>
+<br/>
+<span class="dim">----------------------------------------------------------------------</span><br/>
+<span class="hi">Ran 10 tests in 4.812s</span><br/>
+<br/>
+<span class="ok">OK</span><br/>
+<span class="dim">Destroying test database for alias 'default'...</span><br/>
+<br/>
+<span class="cmd">(.venv) PS C:\hp_factory&gt;</span> <span style="background:#cccccc; color:#0c0c0c">&nbsp;</span><br/>
+</body></html>

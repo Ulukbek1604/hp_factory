@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Бюджет{% endblock %}
+{% block page_title %}Бюджет{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Финансы</div>
+        <h2 class="page-title">Бюджет предприятия</h2>
+        <p class="page-desc">Текущий баланс и управление бюджетом.</p>
+    </div>
+</div>
+
+<div class="stats" style="max-width: 480px; margin-bottom: 20px;">
+    <div class="stat">
+        <div class="stat-label"><span class="dot olive"></span>Текущий бюджет</div>
+        <div class="stat-value">
+            {% if budget %}{{ budget.total_amount|floatformat:0 }}{% else %}—{% endif %}<span class="unit">сом</span>
+        </div>
+    </div>
+</div>
+
+<section class="panel" style="max-width: 480px;">
+    <div class="panel-head">
+        <div class="panel-title">{% if budget %}Изменить бюджет{% else %}Установить бюджет{% endif %}</div>
+    </div>
+    <div class="panel-body">
+        <form method="post" class="col">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Сумма бюджета (сом)</label>
+                <input type="number" name="amount" step="0.01" class="form-control"
+                    value="{% if budget %}{{ budget.total_amount }}{% endif %}" required>
+            </div>
+            <div class="toolbar mt-4">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="alert alert-warn mt-4" style="max-width: 480px;">
+    <div>Бюджет автоматически изменяется триггерами при каждой операции: закупке, продаже, выплате зарплаты, кредите.</div>
+</div>
+
+{% endblock %}

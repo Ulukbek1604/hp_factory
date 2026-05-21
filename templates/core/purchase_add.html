@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Новая закупка{% endblock %}
+{% block page_title %}Закупка сырья{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Операции</div>
+        <h2 class="page-title">Новая закупка</h2>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'purchases_list' %}" class="btn btn-ghost">← Назад</a>
+    </div>
+</div>
+
+{% if budget %}
+<div class="stats" style="max-width: 640px; margin-bottom: 20px;">
+    <div class="stat">
+        <div class="stat-label"><span class="dot olive"></span>Текущий бюджет</div>
+        <div class="stat-value">{{ budget.total_amount|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+</div>
+{% endif %}
+
+<section class="panel" style="max-width: 640px;">
+    <div class="panel-head">
+        <div class="panel-title">Данные закупки</div>
+        <div class="panel-sub">Заполните поля и нажмите «Закупить»</div>
+    </div>
+    <div class="panel-body">
+        <form method="post" class="col">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: var(--brick-ink); font-size: 12px; margin-top: 4px;">{{ field.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="toolbar mt-4">
+                <button type="submit" class="btn btn-primary">Закупить</button>
+                <a href="{% url 'purchases_list' %}" class="btn btn-ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<div class="alert alert-info mt-4" style="max-width: 640px;">
+    <div class="title">Автоматические действия системы</div>
+    <ul>
+        <li>Проверка наличия средств (<code>sp_CheckBudget</code>)</li>
+        <li>Списание суммы из бюджета предприятия</li>
+        <li>Пополнение склада сырья</li>
+    </ul>
+</div>
+
+{% endblock %}

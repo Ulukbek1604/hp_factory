@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% block title %}Отчёты{% endblock %}
+{% block page_title %}Отчёты{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Аналитика</div>
+        <h2 class="page-title">Отчёты предприятия</h2>
+        <p class="page-desc">Сводная финансовая аналитика по всем операциям.</p>
+    </div>
+    <div class="page-actions">
+        <button onclick="window.print()" class="btn btn-ghost">Печать / PDF</button>
+    </div>
+</div>
+
+<!-- Сводные показатели -->
+<div class="stats" style="margin-bottom: 28px;">
+    <div class="stat">
+        <div class="stat-label"><span class="dot olive"></span>Доходы (продажи)</div>
+        <div class="stat-value">+{{ total_sales|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot brick"></span>Закупки сырья</div>
+        <div class="stat-value">-{{ total_purchases|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot amber"></span>Зарплаты</div>
+        <div class="stat-value">-{{ total_salary|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Кредиты получено</div>
+        <div class="stat-value">+{{ total_credits|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot brick"></span>Выплачено по кредитам</div>
+        <div class="stat-value">-{{ total_credit_payments|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot amber"></span>Остаток долга</div>
+        <div class="stat-value">{{ total_remaining_credit|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot {% if budget.total_amount > 0 %}olive{% else %}brick{% endif %}"></span>Текущий бюджет</div>
+        <div class="stat-value">{{ budget.total_amount|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+</div>
+
+<!-- Диаграммы -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:28px;">
+    <section class="panel" style="margin-bottom:0;">
+        <div class="panel-head">
+            <div class="panel-title">Финансовый обзор</div>
+            <div class="panel-sub">сом</div>
+        </div>
+        <div class="panel-body">
+            <canvas id="barChart" height="180"></canvas>
+        </div>
+    </section>
+    <section class="panel" style="margin-bottom:0;">
+        <div class="panel-head">
+            <div class="panel-title">Структура расходов</div>
+        </div>
+        <div class="panel-body">
+            <canvas id="pieChart" height="180"></canvas>
+        </div>
+    </section>
+</div>
+
+<!-- Лаба 1: Закупки -->
+<section class="panel" style="margin-bottom:20px;">
+    <div class="panel-head">
+        <div class="panel-title">Закупки сырья</div>
+        <div class="panel-sub">Лабораторная работа 1</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>№</th><th>Дата</th><th>Сырьё</th><th class="num">Кол-во</th><th class="num">Сумма</th><th>Сотрудник</th></tr></thead>
+                <tbody>
+                    {% for p in purchases %}
+                    <tr>
+                        <td class="id">#{{ p.id }}</td>
+                        <td>{{ p.purchase_date|date:"d.m.Y H:i" }}</td>
+                        <td class="strong">{{ p.material.name }}</td>
+                        <td class="num">{{ p.quantity }}</td>
+                        <td class="num"><span class="badge badge-brick flat">-{{ p.sum_amount }} сом</span></td>
+                        <td class="muted">{{ p.employee.full_name|default:"—" }}</td>
+                    </tr>
+                    {% empty %}<tr class="empty-row"><td colspan="6">Нет данных</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Лаба 2: Производство -->
+<section class="panel" style="margin-bottom:20px;">
+    <div class="panel-head">
+        <div class="panel-title">Производство продукции</div>
+        <div class="panel-sub">Лабораторная работа 2</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>№</th><th>Дата</th><th>Продукция</th><th class="num">Произведено</th><th>Сотрудник</th></tr></thead>
+                <tbody>
+                    {% for pr in productions %}
+                    <tr>
+                        <td class="id">#{{ pr.id }}</td>
+                        <td>{{ pr.production_date|date:"d.m.Y H:i" }}</td>
+                        <td class="strong">{{ pr.product.name }}</td>
+                        <td class="num"><span class="badge badge-olive flat">+{{ pr.quantity }} ед.</span></td>
+                        <td class="muted">{{ pr.employee.full_name|default:"—" }}</td>
+                    </tr>
+                    {% empty %}<tr class="empty-row"><td colspan="5">Нет данных</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Лаба 3: Продажи -->
+<section class="panel" style="margin-bottom:20px;">
+    <div class="panel-head">
+        <div class="panel-title">Продажи готовой продукции</div>
+        <div class="panel-sub">Лабораторная работа 3</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>№</th><th>Дата</th><th>Продукция</th><th class="num">Продано</th><th class="num">Выручка</th><th>Сотрудник</th></tr></thead>
+                <tbody>
+                    {% for s in sales %}
+                    <tr>
+                        <td class="id">#{{ s.id }}</td>
+                        <td>{{ s.sale_date|date:"d.m.Y H:i" }}</td>
+                        <td class="strong">{{ s.product.name }}</td>
+                        <td class="num">{{ s.quantity }} ед.</td>
+                        <td class="num"><span class="badge badge-olive flat">+{{ s.sum_amount }} сом</span></td>
+                        <td class="muted">{{ s.employee.full_name|default:"—" }}</td>
+                    </tr>
+                    {% empty %}<tr class="empty-row"><td colspan="6">Нет данных</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Лаба 4: Зарплаты -->
+<section class="panel" style="margin-bottom:20px;">
+    <div class="panel-head">
+        <div class="panel-title">Выплата зарплат</div>
+        <div class="panel-sub">Лабораторная работа 4</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>№</th><th>Дата</th><th>Сотрудник</th><th class="num">Сумма</th></tr></thead>
+                <tbody>
+                    {% for sal in salaries %}
+                    <tr>
+                        <td class="id">#{{ sal.id }}</td>
+                        <td>{{ sal.payment_date|date:"d.m.Y H:i" }}</td>
+                        <td class="strong">{{ sal.employee.full_name }}</td>
+                        <td class="num"><span class="badge badge-brick flat">-{{ sal.amount }} сом</span></td>
+                    </tr>
+                    {% empty %}<tr class="empty-row"><td colspan="4">Нет данных</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Лаба 5: Кредиты -->
+<section class="panel" style="margin-bottom:20px;">
+    <div class="panel-head">
+        <div class="panel-title">Кредиты</div>
+        <div class="panel-sub">Лабораторная работа 5</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>№</th><th>Дата</th><th class="num">Сумма</th><th class="num">Ставка</th><th class="num">Срок</th><th>Статус</th><th class="num">Остаток</th></tr></thead>
+                <tbody>
+                    {% for cr in credits %}
+                    <tr>
+                        <td class="id">#{{ cr.id }}</td>
+                        <td>{{ cr.credit_date|date:"d.m.Y" }}</td>
+                        <td class="num"><span class="badge badge-olive flat">+{{ cr.amount|floatformat:0 }} сом</span></td>
+                        <td class="num">{{ cr.interest_rate|default:"—" }}{% if cr.interest_rate %} %{% endif %}</td>
+                        <td class="num">{{ cr.term_months|default:"—" }} мес</td>
+                        <td>
+                            {% if cr.status == 'active' %}<span class="badge badge-amber">Активный</span>
+                            {% elif cr.status == 'paid' %}<span class="badge badge-olive">Погашен</span>
+                            {% elif cr.status == 'overdue' %}<span class="badge badge-brick">Просрочен</span>
+                            {% endif %}
+                        </td>
+                        <td class="num">{{ cr.get_remaining_amount|floatformat:0 }} сом</td>
+                    </tr>
+                    {% empty %}<tr class="empty-row"><td colspan="7">Нет данных</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Выплаты по кредитам -->
+<section class="panel" style="margin-bottom:20px;">
+    <div class="panel-head">
+        <div class="panel-title">Выплаты по кредитам</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>№</th><th>Дата</th><th>Кредит</th><th>Тип</th><th class="num">Сумма</th><th>Примечание</th></tr></thead>
+                <tbody>
+                    {% for cp in credit_payments %}
+                    <tr>
+                        <td class="id">#{{ cp.id }}</td>
+                        <td>{{ cp.payment_date|date:"d.m.Y H:i" }}</td>
+                        <td class="muted">#{{ cp.credit.id }} ({{ cp.credit.amount|floatformat:0 }} сом)</td>
+                        <td>
+                            {% if cp.payment_type == 'principal' %}<span class="badge badge-olive">Основной долг</span>
+                            {% elif cp.payment_type == 'interest' %}<span class="badge badge-amber">Проценты</span>
+                            {% elif cp.payment_type == 'fine' %}<span class="badge badge-brick">Штраф</span>
+                            {% else %}<span class="badge badge-gray">Совместная</span>{% endif %}
+                        </td>
+                        <td class="num"><span class="badge badge-brick flat">-{{ cp.amount|floatformat:0 }} сом</span></td>
+                        <td class="muted">{{ cp.note|default:"—" }}</td>
+                    </tr>
+                    {% empty %}<tr class="empty-row"><td colspan="6">Нет выплат по кредитам</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+{{ total_sales|json_script:"js-sales" }}
+{{ total_purchases|json_script:"js-purchases" }}
+{{ total_salary|json_script:"js-salary" }}
+{{ total_credits|json_script:"js-credits" }}
+{{ budget.total_amount|json_script:"js-budget" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    var salesVal     = parseFloat(JSON.parse(document.getElementById('js-sales').textContent)) || 0;
+    var purchasesVal = parseFloat(JSON.parse(document.getElementById('js-purchases').textContent)) || 0;
+    var salaryVal    = parseFloat(JSON.parse(document.getElementById('js-salary').textContent)) || 0;
+    var creditsVal   = parseFloat(JSON.parse(document.getElementById('js-credits').textContent)) || 0;
+    var budgetVal    = parseFloat(JSON.parse(document.getElementById('js-budget').textContent)) || 0;
+
+    Chart.defaults.color = '#58534a';
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Продажи', 'Закупки', 'Зарплаты', 'Кредиты', 'Бюджет'],
+            datasets: [{
+                label: 'Сумма (сом)',
+                data: [salesVal, purchasesVal, salaryVal, creditsVal, budgetVal],
+                backgroundColor: [
+                    'oklch(0.52 0.11 130 / 0.75)',
+                    'oklch(0.54 0.14 35 / 0.75)',
+                    'oklch(0.66 0.13 75 / 0.75)',
+                    'oklch(0.48 0.07 240 / 0.75)',
+                    'oklch(0.42 0.012 80 / 0.75)'
+                ],
+                borderRadius: 5,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toLocaleString('ru-RU') + ' сом' } }
+            },
+            scales: {
+                x: { grid: { color: 'rgba(0,0,0,0.05)' } },
+                y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { callback: val => val.toLocaleString('ru-RU') } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Закупки сырья', 'Зарплаты', 'Кредиты'],
+            datasets: [{
+                data: [purchasesVal, salaryVal, creditsVal],
+                backgroundColor: [
+                    'oklch(0.54 0.14 35 / 0.80)',
+                    'oklch(0.66 0.13 75 / 0.80)',
+                    'oklch(0.48 0.07 240 / 0.80)'
+                ],
+                borderColor: 'oklch(0.985 0.004 85)',
+                borderWidth: 3,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 16, boxWidth: 12 } },
+                tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed.toLocaleString('ru-RU') + ' сом' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

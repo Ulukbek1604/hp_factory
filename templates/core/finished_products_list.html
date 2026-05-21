@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Готовая продукция{% endblock %}
+{% block page_title %}Готовая продукция{% endblock %}
+{% block content %}
+
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Склад</div>
+        <h2 class="page-title">Готовая продукция</h2>
+        <p class="page-desc">Виды продукции, их количество, себестоимость и цена продажи.</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">Добавить</button>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <div class="panel-title">Остатки продукции</div>
+        <div class="panel-sub">Текущее состояние склада готовой продукции</div>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Наименование</th>
+                        <th>Ед. изм.</th>
+                        <th class="num">Количество</th>
+                        <th class="num">Себестоимость</th>
+                        <th class="num">Цена продажи</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td class="id">#{{ p.id }}</td>
+                        <td class="strong">{{ p.name }}</td>
+                        <td class="muted">{{ p.unit }}</td>
+                        <td class="num">{{ p.quantity }}</td>
+                        <td class="num"><span class="badge badge-gray">{{ p.sum_amount }} сом</span></td>
+                        <td class="num"><strong>{{ p.selling_price }} сом</strong></td>
+                        <td>
+                            <button class="btn btn-ghost btn-sm"
+                                onclick="openEdit({{ p.id }}, '{{ p.name|escapejs }}', {{ p.unit_id|default:'null' }}, {{ p.selling_price|stringformat:'f'|default:'0' }})">Изменить</button>
+                            <form method="post" style="display:inline;" onsubmit="return confirm('Удалить?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="pk" value="{{ p.id }}">
+                                <button class="btn btn-danger btn-sm">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="7">Нет продукции. Добавьте позиции.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-title">Добавить продукцию</div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <div class="form-group"><label class="form-label">Наименование</label><input name="name" class="form-control" required placeholder="HP Laptop Pavilion 15..."></div>
+            <div class="form-group"><label class="form-label">Единица измерения</label>
+                <select name="unit_id" class="form-select">{% for u in units %}<option value="{{ u.id }}">{{ u.name }}</option>{% endfor %}</select>
+            </div>
+            <div class="form-group"><label class="form-label">Цена продажи (сом)</label><input type="number" step="0.01" name="selling_price" class="form-control" required value="0"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-title">Редактировать продукцию</div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="pk" id="editPk">
+            <div class="form-group"><label class="form-label">Наименование</label><input name="name" id="editName" class="form-control" required></div>
+            <div class="form-group"><label class="form-label">Единица измерения</label>
+                <select name="unit_id" id="editUnit" class="form-select">{% for u in units %}<option value="{{ u.id }}">{{ u.name }}</option>{% endfor %}</select>
+            </div>
+            <div class="form-group"><label class="form-label">Цена продажи (сом)</label><input type="number" step="0.01" id="editSellingPrice" name="selling_price" class="form-control" required></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('editModal').classList.remove('open')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    function openEdit(pk, name, unitId, sellingPrice) {
+        document.getElementById('editPk').value = pk;
+        document.getElementById('editName').value = name;
+        document.getElementById('editUnit').value = unitId;
+        document.getElementById('editSellingPrice').value = sellingPrice.toString().replace(',', '.');
+        document.getElementById('editModal').classList.add('open');
+    }
+</script>
+{% endblock %}

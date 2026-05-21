@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% block title %}Дашборд{% endblock %}
+{% block page_title %}Дашборд{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <div class="page-eyebrow">Обзор предприятия</div>
+        <h2 class="page-title">Производственная сводка</h2>
+        <p class="page-desc">Ключевые показатели склада, финансов и заявок на производство.</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'production_request_add' %}" class="btn btn-primary">Создать заявку</a>
+        {% if can_manage_finance %}
+        <a href="{% url 'reports' %}" class="btn btn-ghost">Открыть отчеты</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="stats">
+    {% if can_manage_finance %}
+    <div class="stat">
+        <div class="stat-label"><span class="dot olive"></span>Бюджет</div>
+        <div class="stat-value">
+            {% if budget %}{{ budget.total_amount|floatformat:0 }}<span class="unit">сом</span>{% else %}—{% endif %}
+        </div>
+    </div>
+    {% endif %}
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Видов сырья</div>
+        <div class="stat-value">{{ raw_count }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Видов продукции</div>
+        <div class="stat-value">{{ product_count }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot amber"></span>Сотрудников</div>
+        <div class="stat-value">{{ employee_count }}</div>
+    </div>
+    {% if active_credits > 0 %}
+    <div class="stat">
+        <div class="stat-label"><span class="dot amber"></span>Активных кредитов</div>
+        <div class="stat-value">{{ active_credits }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot brick"></span>Задолженность</div>
+        <div class="stat-value">{{ total_credit_debt|floatformat:0 }}<span class="unit">сом</span></div>
+    </div>
+    {% endif %}
+    <div class="stat">
+        <div class="stat-label"><span class="dot steel"></span>Заявок всего</div>
+        <div class="stat-value">{{ total_requests }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot amber"></span>В обработке</div>
+        <div class="stat-value">{{ requests_in_progress }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot olive"></span>Выполнено</div>
+        <div class="stat-value">{{ requests_completed }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label"><span class="dot brick"></span>С ошибкой</div>
+        <div class="stat-value">{{ requests_errors }}</div>
+    </div>
+</div>
+
+{% if can_manage_finance and due_credits %}
+<div class="alert alert-warn">
+    <div>
+        <div class="title">Подошел срок платежа по кредиту</div>
+        <ul>
+            {% for c in due_credits %}
+            <li>Кредит #{{ c.id }} на {{ c.amount|floatformat:0 }} сом.
+                <a class="btn-link" href="{% url 'credit_pay' c.id %}">Оплатить сейчас</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Статусы заявок</div>
+                <div class="panel-sub">Автоматический цикл обработки</div>
+            </div>
+        </div>
+        <div class="panel-body">
+            {% for item in request_status_stats %}
+            <div class="kv-row">
+                <span class="k">{{ item.status }}</span>
+                <span class="v">{{ item.count }}</span>
+            </div>
+            {% empty %}
+            <div class="muted">Нет данных по статусам.</div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Последние заявки</div>
+                <div class="panel-sub">Новые и недавно обработанные производственные заявки</div>
+            </div>
+            <a href="{% url 'production_requests_list' %}" class="btn btn-ghost btn-sm">Все заявки</a>
+        </div>
+        <div class="panel-body flush">
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Дата</th>
+                            <th>Продукция</th>
+                            <th class="num">Кол-во</th>
+                            <th>Статус</th>
+                            <th>Комментарий</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in recent_requests %}
+                        <tr>
+                            <td class="id">#{{ req.id }}</td>
+                            <td>{{ req.creation_date|date:"d.m.Y H:i" }}</td>
+                            <td class="strong">{{ req.product.name }}</td>
+                            <td class="num">{{ req.quantity|floatformat:-2 }}</td>
+                            <td>
+                                {% if req.status == 'Выполнена' %}
+                                <span class="badge badge-olive">{{ req.status }}</span>
+                                {% elif req.status == 'Ошибка' %}
+                                <span class="badge badge-brick">{{ req.status }}</span>
+                                {% elif req.status == 'Создана' %}
+                                <span class="badge badge-gray">{{ req.status }}</span>
+                                {% else %}
+                                <span class="badge badge-steel">{{ req.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="muted">
+                                {% if req.rejection_reason %}{{ req.rejection_reason }}{% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr class="empty-row">
+                            <td colspan="6">Заявок пока нет.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% if can_manage_finance %}
+<section class="panel mt-6">
+    <div class="panel-head">
+        <div>
+            <div class="panel-title">Последние закупки сырья</div>
+            <div class="panel-sub">Пять последних операций пополнения склада</div>
+        </div>
+        <a href="{% url 'purchase_add' %}" class="btn btn-primary btn-sm">Новая закупка</a>
+    </div>
+    <div class="panel-body flush">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Сырье</th>
+                        <th class="num">Количество</th>
+                        <th class="num">Сумма</th>
+                        <th>Дата</th>
+                        <th>Сотрудник</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in recent_purchases %}
+                    <tr>
+                        <td class="strong">{{ p.material }}</td>
+                        <td class="num">{{ p.quantity }}</td>
+                        <td class="num">{{ p.sum_amount }} сом</td>
+                        <td>{{ p.purchase_date|date:"d.m.Y H:i" }}</td>
+                        <td class="muted">{{ p.employee|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="5">Закупок пока нет.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<div class="toolbar mt-6">
+    <a href="{% url 'production_request_add' %}" class="btn btn-primary">Создать заявку</a>
+    <a href="{% url 'production_requests_list' %}" class="btn btn-ghost">Все заявки</a>
+    {% if can_manage_finance %}
+    <a href="{% url 'raw_materials_list' %}" class="btn btn-soft">Склад сырья</a>
+    <a href="{% url 'budget' %}" class="btn btn-soft">Бюджет</a>
+    {% endif %}
+    {% if can_manage_staff %}
+    <a href="{% url 'employees_list' %}" class="btn btn-soft">Сотрудники</a>
+    {% endif %}
+</div>
+{% endblock %}
